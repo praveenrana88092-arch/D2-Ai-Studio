@@ -21,10 +21,8 @@ data class CharacterProfile(
             Personality: $personality
 
             CONSISTENCY RULE:
-            Keep the same face, hairstyle,
-            clothing, age and appearance
-            in every scene.
-            Do not redesign the character.
+            Keep the same face, hairstyle, clothing, age and appearance
+            in every scene. Do not redesign the character.
         """.trimIndent()
     }
 }
@@ -44,18 +42,15 @@ object CharacterManager {
         characters.clear()
         val data = prefs.getString("characters", "[]") ?: "[]"
         val array = JSONArray(data)
-
         for (i in 0 until array.length()) {
             val item = array.getJSONObject(i)
-            characters.add(
-                CharacterProfile(
-                    item.getString("name"),
-                    item.getString("age"),
-                    item.getString("appearance"),
-                    item.getString("clothes"),
-                    item.getString("personality")
-                )
-            )
+            characters.add(CharacterProfile(
+                item.getString("name"),
+                item.getString("age"),
+                item.getString("appearance"),
+                item.getString("clothes"),
+                item.getString("personality")
+            ))
         }
     }
 
@@ -74,7 +69,7 @@ object CharacterManager {
     }
 
     fun add(profile: CharacterProfile) {
-        characters.removeAll { it.name == profile.name }
+        characters.removeAll { it.name.equals(profile.name, ignoreCase = true) }
         characters.add(profile)
         save()
     }
@@ -82,5 +77,10 @@ object CharacterManager {
     fun getAll(): List<CharacterProfile> = characters.toList()
 
     fun find(name: String): CharacterProfile? =
-        characters.find { it.name == name }
+        characters.find { it.name.equals(name, ignoreCase = true) }
+
+    fun delete(name: String) {
+        characters.removeAll { it.name.equals(name, ignoreCase = true) }
+        save()
+    }
 }
