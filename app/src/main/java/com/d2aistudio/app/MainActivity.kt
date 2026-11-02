@@ -25,6 +25,51 @@ private fun openMediaPicker() {
     }
     startActivityForResult(intent, MEDIA_REQUEST)
 }
+   override fun onActivityResult(
+    requestCode: Int,
+    resultCode: Int,
+    data: Intent?
+) {
+    super.onActivityResult(requestCode, resultCode, data)
+
+    if (requestCode == MEDIA_REQUEST && resultCode == RESULT_OK) {
+        val uri: Uri = data?.data ?: return
+
+        try {
+            contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        } catch (_: Exception) {}
+
+        val mime = contentResolver.getType(uri) ?: ""
+        val type = when {
+            mime.startsWith("image/") -> MediaType.IMAGE
+            mime.startsWith("video/") -> MediaType.VIDEO
+            mime.startsWith("audio/") -> MediaType.AUDIO
+            else -> return
+        }
+
+        var fileName = "Imported Media"
+        contentResolver.query(uri, null, null, null, null)?.use {
+            if (it.moveToFirst()) {
+                val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0) fileName = it.getString(index) ?: fileName
+            }
+        }
+
+        MediaLibrary.add(
+            MediaItem(
+                id = uri.toString(),
+                name = fileName,
+                path = uri.toString(),
+                type = type
+            )
+        )
+
+        Toast.makeText(this, "Media added successfully", Toast.LENGTH_SHORT).show()
+    }
+   }
     private lateinit var root: LinearLayout
     private val bg = Color.rgb(13, 17, 30)
     private val card = Color.rgb(28, 35, 53)
@@ -351,19 +396,28 @@ private fun openMediaPicker() {
     }
 
     private fun media() {
-        setup("Media Library")
+    setup("Media Library")
 
-        val items = MediaLibrary.getAll()
-
-        if (items.isEmpty()) {
-            text("No media added yet.", 15, Color.LTGRAY)
-        }
-
-        items.forEach {
-            text("${it.name} - ${it.type}", 16, Color.WHITE)
-            text(it.path, 12, Color.LTGRAY)
-        }
-
-        button("Back") { dashboard() }
+    button("Import Photo / Video / Audio") {
+        openMediaPicker()
     }
-}
+
+    val items = MediaLibrary.getAll()
+
+    if (items.isEmpty()) {
+        text("No media added yet.", 15, Color.LTGRAY)
+    }
+
+    items.forEach {
+        text("${it.name} - ${it.type}", 16, Color.WHITE)
+        text(it.path, 12, Color.LTGRAY)
+    }
+
+    button("Back") {
+        dashboard()
+    }
+    }
+        
+
+        
+
