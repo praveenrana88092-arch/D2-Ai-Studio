@@ -1,5 +1,7 @@
 package com.d2aistudio.app
-
+import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.app.Activity
 import android.os.Bundle
 import android.graphics.Color
@@ -8,7 +10,21 @@ import android.widget.*
 import android.view.ViewGroup
 
 class MainActivity : Activity() {
+private val MEDIA_REQUEST = 501
 
+private fun openMediaPicker() {
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+        addCategory(Intent.CATEGORY_OPENABLE)
+        type = "*/*"
+        putExtra(
+            Intent.EXTRA_MIME_TYPES,
+            arrayOf("image/*", "video/*", "audio/*")
+        )
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+    }
+    startActivityForResult(intent, MEDIA_REQUEST)
+}
     private lateinit var root: LinearLayout
     private val bg = Color.rgb(13, 17, 30)
     private val card = Color.rgb(28, 35, 53)
