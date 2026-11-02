@@ -18,10 +18,14 @@ class MainActivity : Activity() {
     private var currentScenes = emptyList<Scene>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        dashboard()
-    }
+    super.onCreate(savedInstanceState)
 
+    ProjectManager.init(this)
+    CharacterManager.init(this)
+    MediaLibrary.init(this)
+
+    dashboard()
+    }
     private fun setup(title: String) {
         val scroll = ScrollView(this)
         root = LinearLayout(this)
